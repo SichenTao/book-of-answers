@@ -165,14 +165,14 @@ body.writing.inked .pen{transition:transform .45s cubic-bezier(.33,.1,.25,1),fil
 .sealbox{position:relative;display:grid;justify-items:center;transition:opacity .35s;z-index:3}
 body.opened .sealbox{opacity:0;pointer-events:none}
 .dock{position:relative;z-index:5;min-height:76px;display:flex;justify-content:center;align-items:center;padding-bottom:22px}
-.seal{position:relative;width:92px;height:92px;border:none;background:none;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;outline:none}
+.seal{position:relative;width:104px;height:104px;border:none;background:none;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;outline:none}
 .seal svg{position:absolute;inset:0;width:100%;height:100%}
-.seal .wax{position:absolute;inset:14px;animation:breathe 3.2s ease-in-out infinite;border-radius:47% 53% 50% 50%/52% 48% 52% 48%;
+.seal .wax{position:absolute;inset:16px;animation:breathe 3.2s ease-in-out infinite;border-radius:47% 53% 50% 50%/52% 48% 52% 48%;
   background:radial-gradient(circle at 35% 30%,#c4504a,#8a2523 55%,#4b0f10);
   box-shadow:inset 0 -5px 10px rgba(0,0,0,.5),inset 0 3px 6px rgba(255,180,160,.3),0 8px 18px rgba(0,0,0,.65);display:grid;place-items:center;
   transform:scale(calc(1 - var(--charge) * .08));transition:transform .1s,filter .25s}
 .seal .wax::before{content:"";position:absolute;inset:8px;border-radius:50%;border:1.5px solid rgba(255,200,180,.22)}
-.seal .wax b{position:relative;font:900 30px/1 var(--serif);color:#6e1716;
+.seal .wax b{position:relative;font:900 34px/1 var(--serif);color:#6e1716;
   text-shadow:0 1px 0 rgba(255,175,155,.38),0 -1px 0 rgba(0,0,0,.45)}
 .seal:hover .wax{filter:brightness(1.14)}
 .seal:focus-visible .wax{outline:2px solid var(--gold);outline-offset:5px}
@@ -213,16 +213,16 @@ body.revealed .after{display:flex}
   main{padding:60px 12px 0}
   header{padding:12px 14px}
   .brandmark{font-size:11px;letter-spacing:.22em}
-  .stage{gap:12px}
+  .stage{gap:12px;justify-content:flex-end;padding-bottom:7vh}   /* seal sits where the thumb rests */
   .head{gap:4px}
   .penspot{left:calc(var(--pw) * 2 + 42px);top:62%}
   .qline{font-size:24px}
   .penhint{transform:translateX(calc(-50% + 10px))}
   .penhint span{font-size:16px}
   .penhint svg{width:34px;height:34px}
-  .seal{width:76px;height:76px}
-  .seal .wax{inset:11px}
-  .seal .wax b{font-size:25px}
+  .seal{width:88px;height:88px}
+  .seal .wax{inset:13px}
+  .seal .wax b{font-size:29px}
   .prompt{font-size:21px;letter-spacing:.03em}
 }
 @media (prefers-reduced-motion:reduce){ .bookwrap,.stack,.book-shadow{transition:none} }
@@ -256,18 +256,6 @@ body.revealed .after{display:flex}
 
 <main>
   <section class="stage" id="stage">
-    <div class="head" id="head">
-      <div class="sealbox">
-        <button class="seal" id="seal" data-ta="prompt">
-          <svg viewBox="0 0 96 96"><circle class="ring-bg" cx="48" cy="48" r="45"/><circle class="ring" id="ring" cx="48" cy="48" r="45"/></svg>
-          <span class="wax"><b aria-hidden="true">印</b></span>
-        </button>
-      </div>
-      <div class="line">
-        <p class="prompt" id="prompt" aria-live="polite"></p>
-        <input class="qline" id="q" maxlength="60" autocomplete="off" enterkeyhint="done" data-tp="placeholder" aria-label="">
-      </div>
-    </div>
     <div class="bookwrap" id="bookwrap">
       <div class="book-shadow"></div>
       <div class="stack l"></div><div class="stack"></div>
@@ -285,6 +273,19 @@ body.revealed .after{display:flex}
         <rect x="62" y="6.3" width="96" height="1.6" rx=".8" fill="#fff" opacity=".18"/><rect x="172" y="5.8" width="78" height="1.6" rx=".8" fill="#fff" opacity=".14"/>
       </svg></button>
         <div class="penhint" aria-hidden="true"><span data-t="penHint"></span><svg viewBox="0 0 60 60"><path d="M46 58 C 22 60, 12 44, 24 34 C 36 25, 42 42, 28 43 C 14 44, 8 26, 12 4 M5 11 L12 3 L19 10"/></svg></div>
+      </div>
+    </div>
+    <!-- under the book: the line, then the seal at the thumb -->
+    <div class="head" id="head">
+      <div class="line">
+        <p class="prompt" id="prompt" aria-live="polite"></p>
+        <input class="qline" id="q" maxlength="60" autocomplete="off" enterkeyhint="done" data-tp="placeholder" aria-label="">
+      </div>
+      <div class="sealbox">
+        <button class="seal" id="seal" data-ta="prompt">
+          <svg viewBox="0 0 96 96"><circle class="ring-bg" cx="48" cy="48" r="45"/><circle class="ring" id="ring" cx="48" cy="48" r="45"/></svg>
+          <span class="wax"><b aria-hidden="true">印</b></span>
+        </button>
       </div>
     </div>
   </section>
