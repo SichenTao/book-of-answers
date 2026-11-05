@@ -342,7 +342,7 @@ function applyLang(){
   $$('[data-tp]').forEach(el => { el.placeholder = T(el.dataset.tp); el.setAttribute('aria-label', T(el.dataset.tp)); });
   setPrompt();
   $$('#langMenu button').forEach(b => b.setAttribute('aria-checked', b.dataset.lang === lang));
-  if(state === 'idle') buildBook();
+  if(state === 'idle') buildBook(); else relangBook();
 }
 /* :root[lang] selectors need plain codes */
 const _setLang = () => root.setAttribute('lang', lang);
@@ -407,23 +407,17 @@ function buildBook(){
   dims = size();
   const host = document.createElement('div'); slot.appendChild(host);
   const L = LI[lang], pages = [];
-  pages.push(pageHTML('cover', `${EMBLEM}<div class="cover-title">${T('brand')}</div><div class="cover-sub">${T('sub')}</div>`, true));
+  pages.push(pageHTML('cover', `${EMBLEM}<div class="cover-title" data-t="brand">${T('brand')}</div><div class="cover-sub" data-t="sub">${T('sub')}</div>`, true));
   pages.push(pageHTML('endpaper odd', '', true));
   const q = current?.q, final = current;
   for(let p = 2; p <= 2*N + 1; p++){
     const odd = p % 2 === 1, cls = odd ? 'odd' : 'even';
-    if(p === 2){ pages.push(pageHTML(cls, `<span></span><div class="flyleaf-title">${T('brand')}</div><span class="runhead">Liber Responsorum</span>`)); continue; }
-    if(final && p === 2*N - 1){
-      pages.push(pageHTML(cls, `<span></span>${q ? `<div class="asked hand">${esc(q)}</div>` : '<span></span>'}<div class="datel">${final.dateText}</div>`)); continue;
-    }
-    if(final && p === 2*N){
-      const [m, s] = [final.a[L], lang === 'en' ? final.a[0] : final.a[1]];
-      const afs = lang === 'en' ? (m.length > 40 ? .075 : m.length > 22 ? .09 : .11) : (m.length > 12 ? .07 : m.length > 7 ? .08 : .095);
-      pages.push(pageHTML(cls, `<div class="folio">${pageNo(final.page)}</div><div class="answer" style="--afs:${afs}"><div class="main" id="ansMain">${splitText(m)}</div><div class="sub">${esc(s)}</div></div>${ORN}`)); continue;
-    }
-    if(odd){ pages.push(pageHTML(cls, `<span class="runhead">${T('brand')}</span><span></span><span class="folio">${p*7 + 3}</span>`)); }
-    else { const g = ANSWERS[(p*31 + (final ? final.idx : 0)) % ANSWERS.length][L];
-      pages.push(pageHTML(cls, `<span class="folio">${p*7 + 3}</span><div class="ghost">${esc(g)}</div>${ORN}`)); }
+    if(p === 2){ pages.push(pageHTML(cls, `<span></span><div class="flyleaf-title" data-t="brand">${T('brand')}</div><span class="runhead">Liber Responsorum</span>`)); continue; }
+    if(final && p === 2*N - 1){ pages.push(pageHTML(cls + ' ask', askInner())); continue; }
+    if(final && p === 2*N){ pages.push(pageHTML(cls + ' ans', ansInner())); continue; }
+    if(odd){ pages.push(pageHTML(cls, `<span class="runhead" data-t="brand">${T('brand')}</span><span></span><span class="folio">${p*7 + 3}</span>`)); }
+    else { const gi = (p*31 + (final ? final.idx : 0)) % ANSWERS.length;
+      pages.push(pageHTML(cls, `<span class="folio">${p*7 + 3}</span><div class="ghost" data-g="${gi}">${esc(ANSWERS[gi][L])}</div>${ORN}`)); }
   }
   pages.push(pageHTML('endpaper even', '', true));
   pages.push(pageHTML('cover back', '', true));
@@ -435,6 +429,23 @@ function buildBook(){
   const cover = host.querySelector('.cover .in');
   eye.el = cover; eye.pupil = cover.querySelector('.pupil'); eye.lid = cover.querySelector('.lid');
   eyeLidTarget = 0;
+}
+// the final spread, in the current language (rebuilt in place when the language changes)
+const fmtDate = () => new Date().toLocaleDateString(lang === 'zh' ? 'zh-CN' : lang, {year:'numeric', month:'long', day:'numeric'});
+function askInner(){ const q = current.q; return `<span></span>${q ? `<div class="asked hand">${esc(q)}</div>` : '<span></span>'}<div class="datel">${current.dateText}</div>`; }
+function ansInner(){
+  const L = LI[lang], m = current.a[L], s = lang === 'en' ? current.a[0] : current.a[1];
+  const afs = lang === 'en' ? (m.length > 40 ? .075 : m.length > 22 ? .09 : .11) : (m.length > 12 ? .07 : m.length > 7 ? .08 : .095);
+  return `<div class="folio">${pageNo(current.page)}</div><div class="answer" style="--afs:${afs}"><div class="main" id="ansMain">${splitText(m)}</div><div class="sub">${esc(s)}</div></div>${ORN}`;
+}
+function relangBook(){
+  $$('#bookSlot .ghost[data-g]').forEach(el => el.textContent = ANSWERS[el.dataset.g][LI[lang]]);
+  if(!current) return;
+  current.dateText = fmtDate();
+  $$('#bookSlot .page.ask .in').forEach(el => el.innerHTML = askInner());
+  $$('#bookSlot .page.ans .in').forEach(el => el.innerHTML = ansInner());
+  if(state === 'open') $$('#bookSlot #ansMain span').forEach(sp => sp.classList.add('on'));
+  $('#live').textContent = current.a[LI[lang]];
 }
 const splitText = s => lang === 'en' ? s.split(/(\s+)/).map(w => /\s/.test(w) ? w : `<span>${esc(w)}</span>`).join('') : [...s].map(c => `<span>${esc(c)}</span>`).join('');
 const pageNo = n => `${T('pageLabel')} ${n} ${T('pageSuffix')}`.trim();
@@ -597,7 +608,7 @@ function openBook(){
   state = 'opening'; humSet(0); burst = 1; buzz([20,40,30]);
   const q = qIn.value.trim(), {idx, repeat} = choose(q);
   body.classList.remove('writing'); qIn.blur();
-  current = { q, idx, a: ANSWERS[idx], page: idx*3 + 17, d: today(), dateText: new Date().toLocaleDateString(lang === 'zh' ? 'zh-CN' : lang, {year:'numeric', month:'long', day:'numeric'}), repeat };
+  current = { q, idx, a: ANSWERS[idx], page: idx*3 + 17, d: today(), dateText: fmtDate(), repeat };
   if(!repeat){ const h = store.get('aob-hist', []); h.unshift({q, idx, p: current.page, d: today()}); store.set('aob-hist', h.slice(0, 80)); }
   buildBook();
   body.classList.add('opened');
