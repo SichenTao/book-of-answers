@@ -30,7 +30,12 @@ const I18N = {
     sound: "声音",
     lang: "语言",
     released: "书还没听清。再按一会儿。",
-    dragHint: "也可以亲手翻一页试试"
+    dragHint: "也可以亲手翻一页试试",
+    helpTitle: "这个问题，书不替你回答。",
+    helpBody: "愿意把它写下来，已经很不容易。这样的时刻，请和一个真实的人说说话。",
+    helpLines: [["全国心理援助热线（拨打即接通当地）","12356","tel:12356"],["其他地区","findahelpline.com","https://findahelpline.com"]],
+    helpBack: "回到书前",
+    disclaimer: "仅供娱乐。重大决定，请听听专业人士的意见。"
   },
   en: {
     brand: "The Book of Answers",
@@ -63,7 +68,12 @@ const I18N = {
     sound: "Sound",
     lang: "Language",
     released: "The book hasn’t heard you yet. Hold a little longer.",
-    dragHint: "Or turn a page with your own hand"
+    dragHint: "Or turn a page with your own hand",
+    helpTitle: "The book won’t answer this one.",
+    helpBody: "Thank you for writing it down. At a moment like this, please talk to a real person.",
+    helpLines: [["United States: call or text","988","tel:988"],["Anywhere else: find a free helpline","findahelpline.com","https://findahelpline.com"]],
+    helpBack: "Back to the book",
+    disclaimer: "For entertainment only. For big decisions, talk to a professional."
   },
   ja: {
     brand: "答えの書",
@@ -96,6 +106,11 @@ const I18N = {
     sound: "サウンド",
     lang: "言語",
     released: "本には、まだ聞こえていない。もう少し押さえて。",
-    dragHint: "自分の手で、一頁めくってみても"
+    dragHint: "自分の手で、一頁めくってみても",
+    helpTitle: "この問いには、本は答えない。",
+    helpBody: "書き留めてくれて、ありがとう。こんなときは、だれか生身の人と話してみて。",
+    helpLines: [["いのちの電話（無料・毎日16〜21時）","0120-783-556","tel:0120783556"],["いのちの電話（10〜22時）","0570-783-556","tel:0570783556"],["ほかの国・地域","findahelpline.com","https://findahelpline.com"]],
+    helpBack: "本の前に戻る",
+    disclaimer: "お楽しみ用です。大切な決断は、専門家にも相談して。"
   }
 };

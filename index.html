@@ -207,6 +207,14 @@ body.revealed .after{display:flex}
 .seg{display:inline-flex;border:1px solid rgba(217,180,108,.35);border-radius:999px;overflow:hidden}
 .seg button{background:none;border:none;color:var(--muted);padding:10px 16px;cursor:pointer;font:600 14px var(--serif);letter-spacing:.1em}
 .seg button[aria-pressed="true"]{background:rgba(217,180,108,.2);color:var(--gold-hi)}
+.help .hbox{max-width:min(92vw,440px);background:#1a130e;border:1px solid rgba(248,230,182,.22);border-radius:16px;padding:30px 24px 24px;color:#f1e4c6;text-align:center;font-family:var(--book);box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.help h2{margin:0 0 12px;font-size:21px;font-weight:600;color:#f8e6b6}
+.help p{margin:0 0 18px;font-size:15px;line-height:1.7;opacity:.85}
+.help ul{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:10px}
+.help li{padding:10px 12px;border-radius:10px;background:rgba(248,230,182,.06)}
+.help li span{display:block;font-size:13px;opacity:.7}
+.help li a{font-size:22px;color:#f8e6b6;text-decoration:none;letter-spacing:.04em}
+.disclaimer{position:fixed;left:0;right:0;bottom:6px;margin:0;text-align:center;font-size:11px;color:#f1e4c6;opacity:.38;pointer-events:none;z-index:1;padding:0 16px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 @media (max-width:640px){
@@ -298,6 +306,12 @@ body.revealed .after{display:flex}
   </section>
 </main>
 <div class="sr" aria-live="polite" id="live"></div>
+<p class="disclaimer" data-t="disclaimer"></p>
+
+<div class="modal help" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="hbox"><h2 id="helpTitle" data-t="helpTitle"></h2><p data-t="helpBody"></p><ul id="helpLines"></ul>
+    <button class="btn primary" id="helpBack"><span data-t="helpBack"></span></button></div>
+</div>
 
 <aside class="drawer" id="drawer">
   <button class="icon-btn close" id="drawerClose" aria-label="×"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -317,8 +331,8 @@ body.revealed .after{display:flex}
   </div>
 </div>
 
-<script src="src/answers.js?v=20261105"></script>
-<script src="src/i18n.js?v=20261105"></script>
+<script src="src/answers.js?v=20261105b"></script>
+<script src="src/i18n.js?v=20261105b"></script>
 <script src="vendor/page-flip-2.0.7.js"></script>
 <script>
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -340,7 +354,7 @@ function applyLang(){
   $$('[data-t]').forEach(el => el.textContent = T(el.dataset.t));
   $$('[data-ta]').forEach(el => { el.setAttribute('aria-label', T(el.dataset.ta)); el.title = T(el.dataset.ta); });
   $$('[data-tp]').forEach(el => { el.placeholder = T(el.dataset.tp); el.setAttribute('aria-label', T(el.dataset.tp)); });
-  setPrompt();
+  setPrompt(); helpLines();
   $$('#langMenu button').forEach(b => b.setAttribute('aria-checked', b.dataset.lang === lang));
   if(state === 'idle') buildBook(); else relangBook();
 }
@@ -552,8 +566,8 @@ seal.addEventListener('contextmenu', e => e.preventDefault());
 seal.addEventListener('keydown', e => { if(e.code === 'Enter'){ e.preventDefault(); if(!e.repeat) start(); } });
 seal.addEventListener('keyup', e => { if(e.code === 'Enter') stop(); });
 addEventListener('keydown', e => {
-  if(e.code === 'Space' && !e.repeat && e.target !== qIn && !$('#modal').classList.contains('on')){ e.preventDefault(); start(); }
-  if(e.code === 'Escape'){ if($('#modal').classList.contains('on')) closeModal(); else if($('#drawer').classList.contains('on')) $('#drawer').classList.remove('on'); else if(state === 'open') closeBook(); }
+  if(e.code === 'Space' && !e.repeat && e.target !== qIn && !$('#modal').classList.contains('on') && !$('#helpModal').classList.contains('on')){ e.preventDefault(); start(); }
+  if(e.code === 'Escape'){ if($('#helpModal').classList.contains('on')) closeHelp(); else if($('#modal').classList.contains('on')) closeModal(); else if($('#drawer').classList.contains('on')) $('#drawer').classList.remove('on'); else if(state === 'open') closeBook(); }
 });
 addEventListener('keyup', e => { if(e.code === 'Space' && e.target !== qIn) stop(); });
 
@@ -604,7 +618,15 @@ function choose(q){
 
 /* ---------- open / riffle / reveal ---------- */
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// questions about ending one's life get no draw: a gentle word and real people to call instead
+const CRISIS = /自杀|自殺|轻生|輕生|不想活|活不下去|活着没意思|想死|去死|寻死|尋死|结束生命|结束自己|了结自己|割腕|跳楼|跳樓|死了算了|死にたい|消えたい|生きていたくない|生きるのがつらい|自傷|リスカ|suicid|kill myself|end my life|end it all|want to die|wanna die|don.t want to live|self[- ]?harm|hurt myself/i;
+function helpLines(){ $('#helpLines').innerHTML = T('helpLines').map(([k, n, h]) => `<li><span>${esc(k)}</span><a href="${h}"${h.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${esc(n)}</a></li>`).join(''); }
+function showHelp(){ helpLines(); $('#helpModal').classList.add('on'); setTimeout(() => $('#helpBack').focus(), 50); }
+function closeHelp(){ $('#helpModal').classList.remove('on'); }
+$('#helpBack').onclick = closeHelp;
+$('#helpModal').addEventListener('click', e => { if(e.target.id === 'helpModal') closeHelp(); });
 function openBook(){
+  if(CRISIS.test(qIn.value)){ setPrompt('prompt'); showHelp(); return; }
   state = 'opening'; humSet(0); burst = 1; buzz([20,40,30]);
   const q = qIn.value.trim(), {idx, repeat} = choose(q);
   body.classList.remove('writing'); qIn.blur();
